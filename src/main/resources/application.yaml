@@ -1,3 +1,6 @@
 spring:
   application:
     name: chatly
+
+  mongodb:
+    connection-string: mongodb://admin:password@localhost:27017/chatdb?authSource=admin
