@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public User createUser(User user) {
+    public User createUser(UserDto userDto) {
+        User user = userMapper.toEntity(userDto);
         return userRepository.save(user);
     }
 }
