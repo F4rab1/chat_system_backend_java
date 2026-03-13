@@ -24,7 +24,7 @@ public class User {
 
     private String password;
 
-    private Role role;
+    private Role role = Role.USER;
 
     private Profile profile;
 
