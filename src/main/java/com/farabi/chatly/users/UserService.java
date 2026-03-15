@@ -18,6 +18,12 @@ public class UserService {
                 .toList();
     }
 
+    public UserDto getUserById(String id) {
+        return userRepository.findById(id)
+                .map(userMapper::toDto)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
     public User createUser(UserDto userDto) {
         User user = userMapper.toEntity(userDto);
         return userRepository.save(user);
