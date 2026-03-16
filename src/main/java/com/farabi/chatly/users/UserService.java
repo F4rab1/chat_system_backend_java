@@ -24,8 +24,8 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public User createUser(UserDto userDto) {
+    public UserDto createUser(UserDto userDto) {
         User user = userMapper.toEntity(userDto);
-        return userRepository.save(user);
+        return userMapper.toDto(userRepository.save(user));
     }
 }
