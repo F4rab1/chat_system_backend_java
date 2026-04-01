@@ -32,29 +32,13 @@ public class UserService {
     public UserDto updateUser(String id, UpdateUserRequestDto request) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (request.getUsername() != null) {
-            user.setUsername(request.getUsername());
-        }
-
-        if (request.getPassword() != null) {
-            user.setPassword(request.getPassword());
-        }
+        userMapper.update(request, user);
 
         if (request.getProfile() != null) {
             if (user.getProfile() == null) {
                 user.setProfile(new Profile());
             }
-
-            Profile profile = user.getProfile();
-            ProfileDto profileDto = request.getProfile();
-
-            if (profileDto.getDisplayName() != null) {
-                profile.setDisplayName(profileDto.getDisplayName());
-            }
-
-            if (profileDto.getBio() != null) {
-                profile.setBio(profileDto.getBio());
-            }
+            userMapper.updateProfile(request.getProfile(), user.getProfile());
         }
 
         return userMapper.toDto(userRepository.save(user));
