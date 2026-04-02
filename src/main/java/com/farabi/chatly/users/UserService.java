@@ -50,6 +50,17 @@ public class UserService {
         return userMapper.toDto(userRepository.save(user));
     }
 
+    public void changePassword(String id, ChangePasswordRequest request) {
+        var user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!request.getOldPassword().equals(user.getPassword())) {
+            throw new RuntimeException("Password does not match");
+        }
+
+        user.setPassword(request.getNewPassword());
+        userRepository.save(user);
+    }
+
     public void deleteById(String id) {
         userRepository.deleteById(id);
     }
