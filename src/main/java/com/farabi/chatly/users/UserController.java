@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
         var users = userService.getAllUsers();
+
         return ResponseEntity.ok(users);
     }
 
@@ -27,8 +29,18 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto userDto) {
-        return ResponseEntity.ok(userService.createUser(userDto));
+    public ResponseEntity<UserDto> registerUser(
+            @Valid @RequestBody RegisterUserRequest request,
+            UriComponentsBuilder uriComponentsBuilder
+    ) {
+        UserDto userDto = userService.registerUser(request);
+
+        var uri = uriComponentsBuilder
+                .path("/users/{id}")
+                .buildAndExpand(userDto.getId())
+                .toUri();
+
+        return ResponseEntity.created(uri).body(userDto);
     }
 
     @PutMapping("/{id}")

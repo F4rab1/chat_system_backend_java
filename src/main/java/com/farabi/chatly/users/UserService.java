@@ -24,8 +24,14 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public UserDto createUser(UserDto userDto) {
-        User user = userMapper.toEntity(userDto);
+    public UserDto registerUser(RegisterUserRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        User user = userMapper.toEntity(request);
+        user.setRole(Role.USER);
+
         return userMapper.toDto(userRepository.save(user));
     }
 
