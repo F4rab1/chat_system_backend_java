@@ -2,12 +2,16 @@ package com.farabi.chatly.auth;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 @Service
 public class JwtService {
+    @Value("${spring.jwt.secret}")
+    private String secretKey;
+
     public String generateToken(String username) {
         final long tokenExpiration = 86400;
 
@@ -15,7 +19,7 @@ public class JwtService {
                 .subject(username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * tokenExpiration))
-                .signWith(Keys.hmacShaKeyFor("GRFQRkHARYG4rTyJzO1VgSZx7hCtqcHI8dNbb1fbXtM=".getBytes()))
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
     }
 }

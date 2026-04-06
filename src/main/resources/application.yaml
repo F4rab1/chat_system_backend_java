@@ -5,3 +5,5 @@ spring:
   data:
     mongodb:
       uri: mongodb://admin:admin@localhost:27017/chat?authSource=admin
+  jwt:
+    secret: ${JWT_SECRET}
