@@ -3,6 +3,8 @@ package com.farabi.chatly.auth;
 import com.farabi.chatly.users.UserDto;
 import com.farabi.chatly.users.UserMapper;
 import com.farabi.chatly.users.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +25,10 @@ public class AuthController {
     private final UserMapper userMapper;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<JwtResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse response
+    ) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -32,7 +37,15 @@ public class AuthController {
         );
 
         var user = userRepository.findByUsername(request.getUsername()).orElseThrow();
-        var accessToken = jwtService.generateToken(user);
+        var accessToken = jwtService.generateAccessToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+
+        var cookie = new Cookie("refresh_token", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/auth/refresh");
+        cookie.setMaxAge(604800);
+        cookie.setSecure(true);
+        response.addCookie(cookie);
 
         return ResponseEntity.ok(new JwtResponse(accessToken));
     }
