@@ -1,5 +1,6 @@
 package com.farabi.chatly.auth;
 
+import com.farabi.chatly.users.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -14,11 +15,12 @@ public class JwtService {
     @Value("${spring.jwt.secret}")
     private String secretKey;
 
-    public String generateToken(String username) {
+    public String generateToken(User user) {
         final long tokenExpiration = 86400;
 
         return Jwts.builder()
-                .subject(username)
+                .subject(user.getId())
+                .claim("username", user.getUsername())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * tokenExpiration))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
@@ -34,6 +36,10 @@ public class JwtService {
         catch (JwtException ex) {
             return false;
         }
+    }
+
+    public String getUserIdFromToken(String token) {
+        return getClaims(token).getSubject();
     }
 
     public String getUsernameFromToken(String token) {
