@@ -7,3 +7,5 @@ spring:
       uri: mongodb://admin:admin@localhost:27017/chat?authSource=admin
   jwt:
     secret: ${JWT_SECRET}
+    accessTokenExpiration: 300 # 5 minutes
+    refreshTokenExpiration: 604800 # 7 days
