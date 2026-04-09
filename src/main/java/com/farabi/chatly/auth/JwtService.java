@@ -1,5 +1,6 @@
 package com.farabi.chatly.auth;
 
+import com.farabi.chatly.users.Role;
 import com.farabi.chatly.users.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -26,6 +27,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(user.getId())
                 .claim("username", user.getUsername())
+                .claim("role", user.getRole().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * tokenExpiration))
                 .signWith(jwtConfig.getSecretKey())
@@ -49,6 +51,10 @@ public class JwtService {
 
     public String getUsernameFromToken(String token) {
         return getClaims(token).getSubject();
+    }
+
+    public Role getRoleFromToken(String token) {
+        return Role.valueOf(getClaims(token).get("role", String.class));
     }
 
     private Claims getClaims(String token) {
