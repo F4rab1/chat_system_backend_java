@@ -3,6 +3,7 @@ package com.farabi.chatly.auth;
 import com.farabi.chatly.users.UserDto;
 import com.farabi.chatly.users.UserMapper;
 import com.farabi.chatly.users.UserRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/auth")
+@Tag(name = "Authentication")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -41,36 +43,37 @@ public class AuthController {
         var accessToken = jwtService.generateAccessToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
-        var cookie = new Cookie("refresh_token", refreshToken);
+        var cookie = new Cookie("refresh_token", refreshToken.toString());
         cookie.setHttpOnly(true);
         cookie.setPath("/auth/refresh");
         cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration());
         cookie.setSecure(true);
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(new JwtResponse(accessToken));
+        return ResponseEntity.ok(new JwtResponse(accessToken.toString()));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refresh(
             @CookieValue(value = "refresh_token") String refreshToken
     ) {
-        if (!jwtService.validateToken(refreshToken)) {
+        var jwt = jwtService.parseToken(refreshToken);
+        if (jwt == null || jwt.isExpired()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        var userId = jwtService.getUserIdFromToken(refreshToken);
-        var user = userRepository.findById(userId).orElseThrow();
+        var user = userRepository.findById(jwt.getUserId()).orElseThrow();
         var accessToken = jwtService.generateAccessToken(user);
 
-        return ResponseEntity.ok(new JwtResponse(accessToken));
+        return ResponseEntity.ok(new JwtResponse(accessToken.toString()));
     }
 
     @PostMapping("/validate")
     public boolean validate(@RequestHeader("Authorization") String authHeader) {
         var token = authHeader.replace("Bearer ", "");
+        var jwt = jwtService.parseToken(token);
 
-        return jwtService.validateToken(token);
+        return !jwt.isExpired();
     }
 
     @GetMapping("/me")
