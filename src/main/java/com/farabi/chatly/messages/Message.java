@@ -27,6 +27,8 @@ public class Message {
 
     private String content;
 
+    private MessageStatus status = MessageStatus.SENT;
+
     @Indexed
     private Instant createdAt = Instant.now();
 }
